@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #000;
+      --fg: #eaeaea;
+      --muted: #aaaaaa;
+      --tone1: #111;
+      --tone2: #1a1a1a;
+      --tone3: #2a2a2a;
+      --thin: 1px;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      height: 100%;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    .panel {
+      padding: 12px;
+      background: var(--bg);
+    }
+    #canvas {
+      display: block;
+      width: 100%;
+      height: 64vh;
+      background: #000;
+      cursor: crosshair;
+      touch-action: none;
+      border: none;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 10px 12px;
+      align-items: center;
+      margin-top: 12px;
+    }
+    .controls > * { min-width: 0; }
+    .controls label {
+      grid-column: span 2;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .controls output {
+      grid-column: span 2;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: var(--fg);
+    }
+    input[type="range"] {
+      grid-column: span 6;
+      width: 100%;
+      background: transparent;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input[type="range"]:focus { outline: none; }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 4px;
+      background: var(--tone2);
+      border-radius: 2px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      margin-top: -5px;
+      background: #fff;
+      border: var(--thin) solid #fff;
+      border-radius: 50%;
+      box-shadow: none;
+    }
+    input[type="range"]::-moz-range-track {
+      height: 4px;
+      background: var(--tone2);
+      border: none;
+      border-radius: 2px;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 14px; height: 14px;
+      background: #fff;
+      border: none;
+      border-radius: 50%;
+    }
+    input[type="range"]::-ms-track {
+      height: 4px;
+      background: transparent;
+      border-color: transparent;
+      color: transparent;
+    }
+    input[type="range"]::-ms-fill-lower,
+    input[type="range"]::-ms-fill-upper {
+      background: var(--tone2);
+      border-radius: 2px;
+    }
+    input[type="range"]::-ms-thumb {
+      width: 14px; height: 14px;
+      background: #fff;
+      border: none;
+      border-radius: 50%;
+    }
+    .controls .btns {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    button {
+      background: var(--tone1);
+      color: var(--fg);
+      border: var(--thin) solid var(--tone3);
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      line-height: 1;
+      border-radius: 8px;
+    }
+    button:hover {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+    }
+    .toggle {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      user-select: none;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--fg);
+    }
+    input[type="checkbox"] {
+      width: 16px; height: 16px;
+      cursor: pointer;
+      accent-color: #eaeaea;
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    @media (max-width: 700px) {
+      .controls label { grid-column: span 4; }
+      input[type="range"] { grid-column: span 6; }
+      .controls output { grid-column: span 2; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <canvas id="canvas" width="1280" height="720" aria-label="Draw area"></canvas>
+      <div class="controls">
+        <label for="terms">Circles</label>
+        <input id="terms" type="range" min="1" max="60" value="5" step="1" />
+        <output id="termsOut" class="mono">5</output>
+        <label for="speed">Speed</label>
+        <input id="speed" type="range" min="0.25" max="3" value="1" step="0.05" />
+        <output id="speedOut" class="mono">1.00×</output>
+        <label for="progress">Animation</label>
+        <input id="progress" type="range" min="0" max="1" step="0.001" value="0" />
+        <output id="progressOut" class="mono">0%</output>
+        <div class="btns">
+          <button id="btnPlay">Play</button>
+          <button id="btnReset">Reset</button>
+          <button id="btnClear">Clear</button>
+          <label class="toggle"><input id="toggleCircles" type="checkbox" checked /> Show circles</label>
+          <label class="toggle"><input id="toggleConnectors" type="checkbox" /> Show lines between circles</label>
+          <label class="toggle"><input id="toggleSketch" type="checkbox" checked /> Show original sketch</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    function fitCanvasToCSS() {
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    fitCanvasToCSS();
+    window.addEventListener('resize', () => {
+      fitCanvasToCSS();
+      draw();
+    });
+    const termsEl = document.getElementById('terms');
+    const termsOut = document.getElementById('termsOut');
+    const speedEl = document.getElementById('speed');
+    const speedOut = document.getElementById('speedOut');
+    const progressEl = document.getElementById('progress');
+    const progressOut = document.getElementById('progressOut');
+    const btnPlay = document.getElementById('btnPlay');
+    const btnReset = document.getElementById('btnReset');
+    const btnClear = document.getElementById('btnClear');
+    const toggleCircles = document.getElementById('toggleCircles');
+    const toggleConnectors = document.getElementById('toggleConnectors');
+    const toggleSketch = document.getElementById('toggleSketch');
+    const FIXED_SAMPLES = 512;
+    const state = {
+      drawing: false,
+      path: [],
+      resampled: [],
+      fourierAll: [],
+      dc: { amp: 0, phase: 0 },
+      selected: [],
+      terms: +termsEl.value,
+      speed: +speedEl.value,
+      playing: false,
+      tStart: 0,
+      t: 0,
+      lastTime: 0,
+      showCircles: toggleCircles.checked,
+      showConnectors: toggleConnectors.checked,
+      showSketch: toggleSketch.checked,
+      computed: false
+    };
+    function dist(a, b) { return Math.hypot(b.x - a.x, b.y - a.y); }
+    function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
+    function lerp(a,b,t){ return a + (b-a)*t; }
+    function resamplePath(points, N) {
+      if (points.length < 2) return [];
+      const pts = [points[0]];
+      for (let i = 1; i < points.length; i++) {
+        const prev = pts[pts.length - 1];
+        const p = points[i];
+        if (p.x !== prev.x || p.y !== prev.y) pts.push(p);
+      }
+      if (pts.length < 2) return [];
+      const L = [0];
+      let total = 0;
+      for (let i = 1; i < pts.length; i++) { total += dist(pts[i-1], pts[i]); L.push(total); }
+      if (total === 0) return [];
+      const step = total / N;
+      const out = [];
+      let j = 1;
+      for (let k = 0; k < N; k++) {
+        const target = k * step;
+        while (j < L.length && L[j] < target) j++;
+        const i1 = j - 1, i2 = j;
+        const denom = Math.max(1e-12, L[i2] - L[i1]);
+        const t = (target - L[i1]) / denom;
+        const x = pts[i1].x + t * (pts[i2].x - pts[i1].x);
+        const y = pts[i1].y + t * (pts[i2].y - pts[i1].y);
+        out.push({x, y});
+      }
+      return out;
+    }
+    function toComplex(samples) { return samples.map(p => ({ re: p.x, im: -p.y })); }
+    function dftComplex(sequence) {
+      const N = sequence.length;
+      if (!N) return [];
+      const result = [];
+      const half = Math.floor(N / 2);
+      for (let k = -half; k <= half; k++) {
+        let sumRe = 0, sumIm = 0;
+        for (let n = 0; n < N; n++) {
+          const phi = -2 * Math.PI * k * n / N;
+          const c = sequence[n];
+          const cos = Math.cos(phi), sin = Math.sin(phi);
+          sumRe += c.re * cos - c.im * sin;
+          sumIm += c.re * sin + c.im * cos;
+        }
+        sumRe /= N;
+        sumIm /= N;
+        const amp = Math.hypot(sumRe, sumIm);
+        const phase = Math.atan2(sumIm, sumRe);
+        result.push({ freq: k, amp, phase });
+      }
+      return result;
+    }
+    function recomputeSelected() {
+      const all = state.fourierAll;
+      if (!all.length) { state.selected = []; state.dc = { amp:0, phase:0 }; return; }
+      const dcTerm = all.find(t => t.freq === 0);
+      state.dc = dcTerm ? { amp: dcTerm.amp, phase: dcTerm.phase } : { amp: 0, phase: 0 };
+      const rotating = all.filter(t => t.freq !== 0).sort((a,b) => b.amp - a.amp);
+      state.selected = rotating.slice(0, state.terms).map(t => ({ ...t }));
+    }
+    function sumRot(theta) {
+      let x = 0, y = 0;
+      const T = state.selected.length;
+      for (let i = 0; i < T; i++) {
+        const { freq, amp, phase } = state.selected[i];
+        const a = phase + freq * theta;
+        x += amp * Math.cos(a);
+        y += amp * Math.sin(a);
+      }
+      return { re: x, im: y };
+    }
+    function sumPoint(theta) {
+      const p = sumRot(theta);
+      const dcx = state.dc.amp * Math.cos(state.dc.phase);
+      const dcy = state.dc.amp * Math.sin(state.dc.phase);
+      return { re: p.re + dcx, im: p.im + dcy };
+    }
+    function computeStartPhase() {
+      if (!state.resampled.length) return 0;
+      const target = state.resampled[0];
+      const M = 1024;
+      let bestTheta = 0, bestD = Infinity;
+      for (let i = 0; i < M; i++) {
+        const theta = i * (2 * Math.PI / M);
+        const p = sumPoint(theta);
+        const dx = p.re - target.re;
+        const dy = p.im - target.im;
+        const d2 = dx*dx + dy*dy;
+        if (d2 < bestD) { bestD = d2; bestTheta = theta; }
+      }
+      return bestTheta;
+    }
+    function adjustDCForExactStart() {
+      const target = state.resampled[0];
+      const pRot = sumRot(state.tStart);
+      const dcRe = target.re - pRot.re;
+      const dcIm = target.im - pRot.im;
+      state.dc.amp = Math.hypot(dcRe, dcIm);
+      state.dc.phase = Math.atan2(dcIm, dcRe);
+    }
+    function getPointerPos(ev) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = ev.clientX ?? (ev.touches?.[0]?.clientX ?? 0);
+      const clientY = ev.clientY ?? (ev.touches?.[0]?.clientY ?? 0);
+      return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+    function pointerDown(ev) {
+      ev.preventDefault();
+      state.drawing = true;
+      state.path = [];
+      state.resampled = [];
+      state.fourierAll = [];
+      state.selected = [];
+      state.dc = { amp:0, phase:0 };
+      state.computed = false;
+      state.t = 0;
+      state.tStart = 0;
+      progressEl.value = "0";
+      progressOut.textContent = "0%";
+      state.playing = false;
+      btnPlay.textContent = 'Play';
+      const p = getPointerPos(ev);
+      state.path.push(p);
+      draw();
+    }
+    function pointerMove(ev) {
+      if (!state.drawing) return;
+      ev.preventDefault();
+      const p = getPointerPos(ev);
+      const last = state.path[state.path.length - 1];
+      if (!last || Math.hypot(p.x - last.x, p.y - last.y) > 0.6) {
+        state.path.push(p);
+        draw();
+      }
+    }
+    function pointerUp(ev) {
+      if (!state.drawing) return;
+      ev.preventDefault();
+      state.drawing = false;
+      autoComputeFromPath();
+    }
+    canvas.addEventListener('pointerdown', pointerDown);
+    canvas.addEventListener('pointermove', pointerMove);
+    window.addEventListener('pointerup', pointerUp);
+    canvas.addEventListener('touchstart', pointerDown, { passive: false });
+    canvas.addEventListener('touchmove', pointerMove, { passive: false });
+    window.addEventListener('touchend', pointerUp, { passive: false });
+    function autoComputeFromPath() {
+      if (state.path.length < 2) { draw(); return; }
+      const resampledXY = resamplePath(state.path, FIXED_SAMPLES);
+      const complexSamples = toComplex(resampledXY);
+      state.resampled = complexSamples;
+      state.fourierAll = dftComplex(complexSamples);
+      recomputeSelected();
+      state.tStart = computeStartPhase();
+      adjustDCForExactStart();
+      state.t = state.tStart;
+      state.computed = true;
+      progressEl.value = "0";
+      progressOut.textContent = "0%";
+      draw();
+    }
+    termsEl.addEventListener('input', () => {
+      state.terms = +termsEl.value;
+      termsOut.textContent = String(state.terms);
+      if (state.computed) {
+        recomputeSelected();
+        state.tStart = computeStartPhase();
+        adjustDCForExactStart();
+        state.t = state.tStart + +progressEl.value * 2 * Math.PI;
+      }
+      draw();
+    });
+    speedEl.addEventListener('input', () => {
+      state.speed = +speedEl.value;
+      speedOut.textContent = state.speed.toFixed(2) + '×';
+    });
+    toggleCircles.addEventListener('change', () => {
+      state.showCircles = toggleCircles.checked;
+      draw();
+    });
+    toggleConnectors.addEventListener('change', () => {
+      state.showConnectors = toggleConnectors.checked;
+      draw();
+    });
+    toggleSketch.addEventListener('change', () => {
+      state.showSketch = toggleSketch.checked;
+      draw();
+    });
+    progressEl.addEventListener('input', () => {
+      if (!state.computed) return;
+      const frac = +progressEl.value;
+      state.t = state.tStart + frac * 2 * Math.PI;
+      progressOut.textContent = Math.round(frac * 100) + '%';
+      state.playing = false;
+      btnPlay.textContent = 'Play';
+      draw();
+    });
+    btnPlay.addEventListener('click', () => {
+      if (!state.computed) return;
+      state.playing = !state.playing;
+      btnPlay.textContent = state.playing ? 'Pause' : 'Play';
+      if (state.playing) {
+        state.lastTime = performance.now();
+        requestAnimationFrame(tick);
+      }
+    });
+    btnReset.addEventListener('click', () => {
+      if (!state.computed) return;
+      state.t = state.tStart;
+      progressEl.value = "0";
+      progressOut.textContent = "0%";
+      draw();
+    });
+    btnClear.addEventListener('click', () => {
+      state.drawing = false;
+      state.path = [];
+      state.resampled = [];
+      state.fourierAll = [];
+      state.selected = [];
+      state.dc = { amp:0, phase:0 };
+      state.computed = false;
+      state.playing = false;
+      btnPlay.textContent = 'Play';
+      state.t = 0;
+      state.tStart = 0;
+      progressEl.value = "0";
+      progressOut.textContent = "0%";
+      draw();
+    });
+    function tick(now) {
+      if (!state.playing) return;
+      const dt = Math.min(0.05, (now - state.lastTime) / 1000);
+      state.lastTime = now;
+      const basePeriod = 8.0;
+      const dTheta = (2 * Math.PI / basePeriod) * state.speed * dt;
+      let newT = state.t + dTheta;
+      const end = state.tStart + 2 * Math.PI;
+      if (newT >= end) {
+        newT = end;
+        state.playing = false;
+        btnPlay.textContent = 'Play';
+      }
+      state.t = newT;
+      const frac = clamp((state.t - state.tStart) / (2 * Math.PI), 0, 1);
+      progressEl.value = String(frac);
+      progressOut.textContent = Math.round(frac * 100) + '%';
+      draw();
+      if (state.playing) requestAnimationFrame(tick);
+    }
+    function clearCanvas() {
+      ctx.save();
+      ctx.setTransform(1,0,0,1,0,0);
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.restore();
+    }
+    function drawSketch() {
+      if (!state.showSketch) return;
+      if (state.path.length < 2) return;
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#bdbdbd';
+      ctx.globalAlpha = 0.35;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(state.path[0].x, state.path[0].y);
+      for (let i = 1; i < state.path.length; i++) {
+        const p = state.path[i];
+        ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+    function drawRollingCircles() {
+      if (!state.computed || !state.showCircles) return;
+      const T = Math.min(state.terms, state.selected.length);
+      if (T === 0) return;
+      const R = new Array(T);
+      const A = new Array(T);
+      for (let i = 0; i < T; i++) {
+        const { amp, phase, freq } = state.selected[i];
+        R[i] = amp;
+        A[i] = phase + freq * state.t;
+      }
+      const tip = sumPoint(state.t);
+      const C = new Array(T);
+      let cx = tip.re - R[T-1] * Math.cos(A[T-1]);
+      let cy = tip.im - R[T-1] * Math.sin(A[T-1]);
+      C[T-1] = { x: cx, y: cy };
+      for (let i = T - 2; i >= 0; i--) {
+        cx -= (R[i] + R[i+1]) * Math.cos(A[i]);
+        cy -= (R[i] + R[i+1]) * Math.sin(A[i]);
+        C[i] = { x: cx, y: cy };
+      }
+      ctx.save();
+      ctx.lineWidth = 1.2;
+      if (state.showConnectors) {
+        ctx.strokeStyle = '#9e9e9e';
+        ctx.globalAlpha = 0.45;
+        for (let i = 0; i < T - 1; i++) {
+          const c1 = C[i], c2 = C[i+1];
+          ctx.beginPath();
+          ctx.moveTo(c1.x, -c1.y);
+          ctx.lineTo(c2.x, -c2.y);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+      }
+      ctx.strokeStyle = '#cfcfcf';
+      ctx.globalAlpha = 0.35;
+      for (let i = 0; i < T; i++) {
+        if (R[i] < 1e-6) continue;
+        ctx.beginPath();
+        ctx.arc(C[i].x, -C[i].y, Math.abs(R[i]), 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+    function drawTrace() {
+      if (!state.computed) return;
+      const t0 = state.tStart;
+      const t1 = state.t;
+      const steps = Math.max(12, Math.floor(lerp(200, 800, clamp((t1 - t0) / (2*Math.PI), 0, 1))));
+      ctx.save();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      for (let i = 0; i <= steps; i++) {
+        const tt = lerp(t0, t1, i / steps);
+        const p = sumPoint(tt);
+        const x = p.re, y = -p.im;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.restore();
+      const tip = sumPoint(t1);
+      ctx.save();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(tip.re, -tip.im, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    function draw() {
+      clearCanvas();
+      drawSketch();
+      drawRollingCircles();
+      drawTrace();
+    }
+    termsOut.textContent = String(state.terms);
+    speedOut.textContent = state.speed.toFixed(2) + '×';
+    progressOut.textContent = "0%";
+    draw();
+  </script>
+</body>
+</html>
