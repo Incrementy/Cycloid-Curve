@@ -5,7 +5,7 @@
   <title></title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root { 
+    :root {
       --bg: #000;
       --fg: #eaeaea;
       --muted: #aaaaaa;
@@ -22,15 +22,8 @@
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
       height: 100%;
     }
-    .wrap {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-    .panel {
-      padding: 12px;
-      background: var(--bg);
-    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+    .panel { padding: 12px; background: var(--bg); }
     #canvas {
       display: block;
       width: 100%;
@@ -48,17 +41,8 @@
       margin-top: 12px;
     }
     .controls > * { min-width: 0; }
-    .controls label {
-      grid-column: span 2;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .controls output {
-      grid-column: span 2;
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-      color: var(--fg);
-    }
+    .controls label { grid-column: span 2; font-size: 12px; color: var(--muted); }
+    .controls output { grid-column: span 2; text-align: right; font-variant-numeric: tabular-nums; color: var(--fg); }
     input[type="range"] {
       grid-column: span 6;
       width: 100%;
@@ -67,88 +51,25 @@
       appearance: none;
     }
     input[type="range"]:focus { outline: none; }
-    input[type="range"]::-webkit-slider-runnable-track {
-      height: 4px;
-      background: var(--tone2);
-      border-radius: 2px;
-    }
+    input[type="range"]::-webkit-slider-runnable-track { height: 4px; background: var(--tone2); border-radius: 2px; }
     input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 14px; height: 14px;
-      margin-top: -5px;
-      background: #fff;
-      border: var(--thin) solid #fff;
-      border-radius: 50%;
-      box-shadow: none;
+      -webkit-appearance: none; width: 14px; height: 14px; margin-top: -5px;
+      background: #fff; border: var(--thin) solid #fff; border-radius: 50%; box-shadow: none;
     }
-    input[type="range"]::-moz-range-track {
-      height: 4px;
-      background: var(--tone2);
-      border: none;
-      border-radius: 2px;
-    }
-    input[type="range"]::-moz-range-thumb {
-      width: 14px; height: 14px;
-      background: #fff;
-      border: none;
-      border-radius: 50%;
-    }
-    input[type="range"]::-ms-track {
-      height: 4px;
-      background: transparent;
-      border-color: transparent;
-      color: transparent;
-    }
-    input[type="range"]::-ms-fill-lower,
-    input[type="range"]::-ms-fill-upper {
-      background: var(--tone2);
-      border-radius: 2px;
-    }
-    input[type="range"]::-ms-thumb {
-      width: 14px; height: 14px;
-      background: #fff;
-      border: none;
-      border-radius: 50%;
-    }
-    .controls .btns {
-      grid-column: 1 / -1;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
+    input[type="range"]::-moz-range-track { height: 4px; background: var(--tone2); border: none; border-radius: 2px; }
+    input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; background: #fff; border: none; border-radius: 50%; }
+    input[type="range"]::-ms-track { height: 4px; background: transparent; border-color: transparent; color: transparent; }
+    input[type="range"]::-ms-fill-lower, input[type="range"]::-ms-fill-upper { background: var(--tone2); border-radius: 2px; }
+    input[type="range"]::-ms-thumb { width: 14px; height: 14px; background: #fff; border: none; border-radius: 50%; }
+    .controls .btns { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
     button {
-      background: var(--tone1);
-      color: var(--fg);
-      border: var(--thin) solid var(--tone3);
-      padding: 8px 12px;
-      font-size: 14px;
-      cursor: pointer;
-      line-height: 1;
-      border-radius: 8px;
+      background: var(--tone1); color: var(--fg); border: var(--thin) solid var(--tone3);
+      padding: 8px 12px; font-size: 14px; cursor: pointer; line-height: 1; border-radius: 8px;
     }
-    button:hover {
-      background: #fff;
-      color: #000;
-      border-color: #fff;
-    }
-    .toggle {
-      display: inline-flex;
-      gap: 8px;
-      align-items: center;
-      user-select: none;
-      cursor: pointer;
-      font-size: 13px;
-      color: var(--fg);
-    }
-    input[type="checkbox"] {
-      width: 16px; height: 16px;
-      cursor: pointer;
-      accent-color: #eaeaea;
-    }
-    .mono {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-    }
+    button:hover { background: #fff; color: #000; border-color: #fff; }
+    .toggle { display: inline-flex; gap: 8px; align-items: center; user-select: none; cursor: pointer; font-size: 13px; color: var(--fg); }
+    input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #eaeaea; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
     @media (max-width: 700px) {
       .controls label { grid-column: span 4; }
       input[type="range"] { grid-column: span 6; }
@@ -176,6 +97,7 @@
           <button id="btnClear">Clear</button>
           <label class="toggle"><input id="toggleCircles" type="checkbox" checked /> Show circles</label>
           <label class="toggle"><input id="toggleConnectors" type="checkbox" /> Show lines between circles</label>
+          <label class="toggle"><input id="toggleHideBase" type="checkbox" checked /> Hide largest circle</label>
           <label class="toggle"><input id="toggleSketch" type="checkbox" checked /> Show original sketch</label>
         </div>
       </div>
@@ -192,10 +114,8 @@
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
     fitCanvasToCSS();
-    window.addEventListener('resize', () => {
-      fitCanvasToCSS();
-      draw();
-    });
+    window.addEventListener('resize', () => { fitCanvasToCSS(); draw(); });
+
     const termsEl = document.getElementById('terms');
     const termsOut = document.getElementById('termsOut');
     const speedEl = document.getElementById('speed');
@@ -207,8 +127,11 @@
     const btnClear = document.getElementById('btnClear');
     const toggleCircles = document.getElementById('toggleCircles');
     const toggleConnectors = document.getElementById('toggleConnectors');
+    const toggleHideBase = document.getElementById('toggleHideBase');
     const toggleSketch = document.getElementById('toggleSketch');
+
     const FIXED_SAMPLES = 512;
+
     const state = {
       drawing: false,
       path: [],
@@ -224,12 +147,15 @@
       lastTime: 0,
       showCircles: toggleCircles.checked,
       showConnectors: toggleConnectors.checked,
+      hideBase: toggleHideBase.checked,
       showSketch: toggleSketch.checked,
       computed: false
     };
+
     function dist(a, b) { return Math.hypot(b.x - a.x, b.y - a.y); }
     function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
     function lerp(a,b,t){ return a + (b-a)*t; }
+
     function resamplePath(points, N) {
       if (points.length < 2) return [];
       const pts = [points[0]];
@@ -259,6 +185,7 @@
       return out;
     }
     function toComplex(samples) { return samples.map(p => ({ re: p.x, im: -p.y })); }
+
     function dftComplex(sequence) {
       const N = sequence.length;
       if (!N) return [];
@@ -273,22 +200,33 @@
           sumRe += c.re * cos - c.im * sin;
           sumIm += c.re * sin + c.im * cos;
         }
-        sumRe /= N;
-        sumIm /= N;
+        sumRe /= N; sumIm /= N;
         const amp = Math.hypot(sumRe, sumIm);
         const phase = Math.atan2(sumIm, sumRe);
         result.push({ freq: k, amp, phase });
       }
       return result;
     }
+
     function recomputeSelected() {
       const all = state.fourierAll;
       if (!all.length) { state.selected = []; state.dc = { amp:0, phase:0 }; return; }
       const dcTerm = all.find(t => t.freq === 0);
       state.dc = dcTerm ? { amp: dcTerm.amp, phase: dcTerm.phase } : { amp: 0, phase: 0 };
-      const rotating = all.filter(t => t.freq !== 0).sort((a,b) => b.amp - a.amp);
-      state.selected = rotating.slice(0, state.terms).map(t => ({ ...t }));
+      const byFreq = new Map();
+      for (const t of all) if (t.freq !== 0) byFreq.set(t.freq, t);
+      const keys = Array.from(byFreq.keys());
+      let maxAbs = 0;
+      for (const k of keys) maxAbs = Math.max(maxAbs, Math.abs(k));
+      const ordered = [];
+      for (let k = 1; k <= maxAbs && ordered.length < state.terms; k++) {
+        const p = byFreq.get(k); if (p) ordered.push(p);
+        if (ordered.length >= state.terms) break;
+        const n = byFreq.get(-k); if (n) ordered.push(n);
+      }
+      state.selected = ordered.slice(0, state.terms).map(t => ({ ...t }));
     }
+
     function sumRot(theta) {
       let x = 0, y = 0;
       const T = state.selected.length;
@@ -329,6 +267,7 @@
       state.dc.amp = Math.hypot(dcRe, dcIm);
       state.dc.phase = Math.atan2(dcIm, dcRe);
     }
+
     function getPointerPos(ev) {
       const rect = canvas.getBoundingClientRect();
       const clientX = ev.clientX ?? (ev.touches?.[0]?.clientX ?? 0);
@@ -376,6 +315,7 @@
     canvas.addEventListener('touchstart', pointerDown, { passive: false });
     canvas.addEventListener('touchmove', pointerMove, { passive: false });
     window.addEventListener('touchend', pointerUp, { passive: false });
+
     function autoComputeFromPath() {
       if (state.path.length < 2) { draw(); return; }
       const resampledXY = resamplePath(state.path, FIXED_SAMPLES);
@@ -391,6 +331,7 @@
       progressOut.textContent = "0%";
       draw();
     }
+
     termsEl.addEventListener('input', () => {
       state.terms = +termsEl.value;
       termsOut.textContent = String(state.terms);
@@ -406,18 +347,11 @@
       state.speed = +speedEl.value;
       speedOut.textContent = state.speed.toFixed(2) + '×';
     });
-    toggleCircles.addEventListener('change', () => {
-      state.showCircles = toggleCircles.checked;
-      draw();
-    });
-    toggleConnectors.addEventListener('change', () => {
-      state.showConnectors = toggleConnectors.checked;
-      draw();
-    });
-    toggleSketch.addEventListener('change', () => {
-      state.showSketch = toggleSketch.checked;
-      draw();
-    });
+    toggleCircles.addEventListener('change', () => { state.showCircles = toggleCircles.checked; draw(); });
+    toggleConnectors.addEventListener('change', () => { state.showConnectors = toggleConnectors.checked; draw(); });
+    toggleHideBase.addEventListener('change', () => { state.hideBase = toggleHideBase.checked; draw(); });
+    toggleSketch.addEventListener('change', () => { state.showSketch = toggleSketch.checked; draw(); });
+
     progressEl.addEventListener('input', () => {
       if (!state.computed) return;
       const frac = +progressEl.value;
@@ -459,6 +393,7 @@
       progressOut.textContent = "0%";
       draw();
     });
+
     function tick(now) {
       if (!state.playing) return;
       const dt = Math.min(0.05, (now - state.lastTime) / 1000);
@@ -479,6 +414,7 @@
       draw();
       if (state.playing) requestAnimationFrame(tick);
     }
+
     function clearCanvas() {
       ctx.save();
       ctx.setTransform(1,0,0,1,0,0);
@@ -504,10 +440,12 @@
       ctx.stroke();
       ctx.restore();
     }
+
     function drawRollingCircles() {
       if (!state.computed || !state.showCircles) return;
       const T = Math.min(state.terms, state.selected.length);
       if (T === 0) return;
+
       const R = new Array(T);
       const A = new Array(T);
       for (let i = 0; i < T; i++) {
@@ -515,21 +453,24 @@
         R[i] = amp;
         A[i] = phase + freq * state.t;
       }
-      const tip = sumPoint(state.t);
+
+      const dcx = state.dc.amp * Math.cos(state.dc.phase);
+      const dcy = state.dc.amp * Math.sin(state.dc.phase);
+
       const C = new Array(T);
-      let cx = tip.re - R[T-1] * Math.cos(A[T-1]);
-      let cy = tip.im - R[T-1] * Math.sin(A[T-1]);
-      C[T-1] = { x: cx, y: cy };
-      for (let i = T - 2; i >= 0; i--) {
-        cx -= (R[i] + R[i+1]) * Math.cos(A[i]);
-        cy -= (R[i] + R[i+1]) * Math.sin(A[i]);
-        C[i] = { x: cx, y: cy };
+      C[0] = { x: dcx, y: dcy };
+      for (let i = 0; i < T - 1; i++) {
+        const nx = C[i].x + (R[i] + R[i+1]) * Math.cos(A[i]);
+        const ny = C[i].y + (R[i] + R[i+1]) * Math.sin(A[i]);
+        C[i+1] = { x: nx, y: ny };
       }
+
       ctx.save();
       ctx.lineWidth = 1.2;
+
       if (state.showConnectors) {
         ctx.strokeStyle = '#9e9e9e';
-        ctx.globalAlpha = 0.45;
+        ctx.globalAlpha = 0.6;
         for (let i = 0; i < T - 1; i++) {
           const c1 = C[i], c2 = C[i+1];
           ctx.beginPath();
@@ -539,17 +480,21 @@
         }
         ctx.globalAlpha = 1;
       }
-      ctx.strokeStyle = '#cfcfcf';
-      ctx.globalAlpha = 0.35;
+
       for (let i = 0; i < T; i++) {
+        if (state.hideBase && i === 0) continue;
         if (R[i] < 1e-6) continue;
+        ctx.strokeStyle = '#cfcfcf';
+        ctx.globalAlpha = 0.35;
         ctx.beginPath();
         ctx.arc(C[i].x, -C[i].y, Math.abs(R[i]), 0, Math.PI * 2);
         ctx.stroke();
+        ctx.globalAlpha = 1;
       }
-      ctx.globalAlpha = 1;
+
       ctx.restore();
     }
+
     function drawTrace() {
       if (!state.computed) return;
       const t0 = state.tStart;
